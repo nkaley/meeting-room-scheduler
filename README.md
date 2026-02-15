@@ -51,6 +51,10 @@ docker compose -f docker-compose.prod.yml exec app npx prisma db push
 | `ALLOWED_DOMAIN`   | Optional; comma-separated email domains for sign-up (e.g. `@company.com`) |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | For sending verification emails on sign-up |
 
+## Author
+
+Created by [Nikita Aleinikov](https://github.com/nkaley).
+
 ## License
 
 MIT
