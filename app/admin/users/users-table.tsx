@@ -50,7 +50,7 @@ export function UsersTable({ users }: { users: User[] }) {
       }
       setUserToDelete(null);
       router.refresh();
-    } catch (err) {
+    } catch {
       setError(t("networkOrRefreshError"));
     } finally {
       setDeleting(false);

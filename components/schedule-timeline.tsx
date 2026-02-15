@@ -69,7 +69,6 @@ type ScheduleTimelineProps = {
   isAdmin: boolean;
   onBookingsChange: () => void;
   settings: ScheduleSettings;
-  isKiosk?: boolean;
 };
 
 export function ScheduleTimeline({
@@ -80,7 +79,6 @@ export function ScheduleTimeline({
   isAdmin,
   onBookingsChange,
   settings,
-  isKiosk = false,
 }: ScheduleTimelineProps) {
   const { t } = useLanguage();
   const selectedDay = useMemo(() => parseLocalDate(selectedDate), [selectedDate]);
@@ -172,18 +170,13 @@ export function ScheduleTimeline({
                 <SlotCell
                   booking={booking}
                   currentUserId={currentUserId}
-                  isAdmin={isAdmin}
-                  onFreeClick={isKiosk ? undefined : () => openCreate(new Date(slotStart))}
+                  onFreeClick={() => openCreate(new Date(slotStart))}
                   onBookingClick={
-                    isKiosk
-                      ? undefined
-                      : booking && (booking.userId === currentUserId || isAdmin)
-                        ? () => setViewBooking(booking)
-                        : undefined
+                    booking && (booking.userId === currentUserId || isAdmin)
+                      ? () => setViewBooking(booking)
+                      : undefined
                   }
                   bookSlotLabel={t("bookSlot")}
-                  freeLabel={t("free")}
-                  isKiosk={isKiosk}
                 />
               </div>
             );
@@ -191,7 +184,6 @@ export function ScheduleTimeline({
         </div>
       </div>
 
-      {!isKiosk && (
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent>
           <DialogHeader>
@@ -253,9 +245,7 @@ export function ScheduleTimeline({
           )}
         </DialogContent>
       </Dialog>
-      )}
 
-      {!isKiosk && (
       <Dialog open={!!viewBooking} onOpenChange={(open) => !open && setViewBooking(null)}>
         <DialogContent>
           <DialogHeader>
@@ -296,7 +286,6 @@ export function ScheduleTimeline({
           )}
         </DialogContent>
       </Dialog>
-      )}
     </>
   );
 }
@@ -304,21 +293,15 @@ export function ScheduleTimeline({
 function SlotCell({
   booking,
   currentUserId,
-  isAdmin,
   onFreeClick,
   onBookingClick,
   bookSlotLabel,
-  freeLabel,
-  isKiosk,
 }: {
   booking: BookingItem | null;
   currentUserId: string;
-  isAdmin: boolean;
   onFreeClick: (() => void) | undefined;
   onBookingClick?: () => void;
   bookSlotLabel: string;
-  freeLabel: string;
-  isKiosk: boolean;
 }) {
   const isMine = booking?.userId === currentUserId;
 
@@ -330,8 +313,8 @@ function SlotCell({
           onBookingClick && "cursor-pointer"
         )}
         style={{ minHeight: ROW_HEIGHT }}
-        onClick={!isKiosk ? onBookingClick : undefined}
-        role={!isKiosk && onBookingClick ? "button" : undefined}
+        onClick={onBookingClick}
+        role={onBookingClick ? "button" : undefined}
       >
         <Card
           className={cn(
@@ -357,16 +340,6 @@ function SlotCell({
     );
   }
 
-  if (isKiosk) {
-    return (
-      <div
-        className="flex min-h-[80px] w-full items-center justify-center border-b border-dashed border-slate-100 bg-slate-50/30"
-        style={{ minHeight: ROW_HEIGHT }}
-      >
-        <span className="text-sm text-slate-400">{freeLabel}</span>
-      </div>
-    );
-  }
   return (
     <button
       type="button"
