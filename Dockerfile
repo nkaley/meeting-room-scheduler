@@ -30,6 +30,8 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules ./node_modules
 
+RUN chown -R nextjs:nodejs /app/node_modules /app/prisma
+
 USER nextjs
 
 EXPOSE 3000
