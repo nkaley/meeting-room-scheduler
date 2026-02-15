@@ -25,6 +25,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { createBooking } from "@/app/actions/bookings";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/language-context";
+import type { ScheduleSettings } from "@/lib/settings";
 import { LogOut, Shield } from "lucide-react";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
@@ -67,15 +68,17 @@ export function Calendar({
   initialBookings,
   initialDate,
   isAdmin,
+  settings,
 }: {
   rooms: Room[];
   initialRoomId: string;
   initialBookings: BookingItem[];
   initialDate: string;
   isAdmin: boolean;
+  settings: ScheduleSettings;
 }) {
   const { t } = useLanguage();
-  const selectableDays = useMemo(() => getSelectableDays(), []);
+  const selectableDays = useMemo(() => getSelectableDays(settings), [settings]);
   const [selectedDate, setSelectedDate] = useState(initialDate);
   const [roomId, setRoomId] = useState(initialRoomId);
   const [bookings, setBookings] = useState<BookingItem[]>(initialBookings);
@@ -86,7 +89,7 @@ export function Calendar({
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const selectedDay = useMemo(() => parseLocalDate(selectedDate), [selectedDate]);
-  const slots = useMemo(() => getSlotsForDay(selectedDay), [selectedDay]);
+  const slots = useMemo(() => getSlotsForDay(selectedDay, settings), [selectedDay, settings]);
   const isWeekend = selectedDay.getDay() === 0 || selectedDay.getDay() === 6;
 
   async function refetchBookings() {
