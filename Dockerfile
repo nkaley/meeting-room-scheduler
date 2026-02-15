@@ -9,6 +9,8 @@ RUN npm ci
 
 COPY . .
 RUN npx prisma generate
+RUN cp /app/node_modules/prisma/build/*.wasm /app/node_modules/.bin/ 2>/dev/null || true; \
+    cp /app/node_modules/@prisma/prisma-schema-wasm/*.wasm /app/node_modules/.bin/ 2>/dev/null || true
 RUN npm run build
 
 # Production stage (standalone)
@@ -28,7 +30,7 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
+COPY --from=builder /app/node_modules/.bin ./node_modules/.bin
 
 USER nextjs
 
