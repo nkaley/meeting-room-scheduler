@@ -110,7 +110,7 @@ export async function cancelBooking(bookingId: string) {
     return { error: "You can only cancel your own bookings" };
   }
 
-  if (booking.startTime < new Date()) {
+  if (booking.startTime < new Date() && !isAdmin) {
     return { error: "Cannot cancel a past booking" };
   }
 
