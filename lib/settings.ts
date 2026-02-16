@@ -8,6 +8,7 @@ export type ScheduleSettings = {
   maxBookingDistanceDays: number;
   maxBookingDurationMinutes: number;
   requireDescription: boolean;
+  timezone: string;
 };
 
 const DEFAULTS: ScheduleSettings = {
@@ -18,6 +19,7 @@ const DEFAULTS: ScheduleSettings = {
   maxBookingDistanceDays: 14,
   maxBookingDurationMinutes: 120,
   requireDescription: false,
+  timezone: "UTC",
 };
 
 export async function getOrCreateSettings(): Promise<ScheduleSettings> {
@@ -37,6 +39,7 @@ async function getOrCreateSettingsRow() {
         maxBookingDistanceDays: DEFAULTS.maxBookingDistanceDays,
         maxBookingDurationMinutes: DEFAULTS.maxBookingDurationMinutes,
         requireDescription: DEFAULTS.requireDescription,
+        timezone: DEFAULTS.timezone,
       },
     });
   }
@@ -51,6 +54,7 @@ function rowToSettings(row: {
   maxBookingDistanceDays?: number;
   maxBookingDurationMinutes?: number;
   requireDescription?: boolean;
+  timezone?: string | null;
 }): ScheduleSettings {
   const workDays = row.workDays && Array.isArray(row.workDays) ? row.workDays : DEFAULTS.workDays;
   return {
@@ -61,6 +65,7 @@ function rowToSettings(row: {
     maxBookingDistanceDays: row.maxBookingDistanceDays ?? DEFAULTS.maxBookingDistanceDays,
     maxBookingDurationMinutes: row.maxBookingDurationMinutes ?? DEFAULTS.maxBookingDurationMinutes,
     requireDescription: row.requireDescription ?? DEFAULTS.requireDescription,
+    timezone: row.timezone?.trim() || DEFAULTS.timezone,
   };
 }
 
@@ -78,6 +83,7 @@ export async function updateSettings(data: UpdateSettingsInput): Promise<{ error
       maxBookingDistanceDays: data.maxBookingDistanceDays,
       maxBookingDurationMinutes: data.maxBookingDurationMinutes,
       requireDescription: data.requireDescription,
+      timezone: data.timezone,
     },
   });
   return {};

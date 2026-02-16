@@ -62,14 +62,15 @@ model Booking {
 }
 
 model SystemSettings {
-  id                     String   @id @default(uuid())
-  workStartHour          Int      @default(9) @map("work_start_hour")
-  workEndHour            Int      @default(18) @map("work_end_hour")
-  bookingStepMinutes     Int      @default(30) @map("booking_step_minutes")
-  workDays               Int[]    @default([1, 2, 3, 4, 5]) @map("work_days")
+  id                        String   @id @default(uuid())
+  workStartHour             Int      @default(9) @map("work_start_hour")
+  workEndHour               Int      @default(18) @map("work_end_hour")
+  bookingStepMinutes        Int      @default(30) @map("booking_step_minutes")
+  workDays                  Int[]    @default([1, 2, 3, 4, 5]) @map("work_days")
   maxBookingDistanceDays    Int      @default(14) @map("max_booking_distance_days")
   maxBookingDurationMinutes Int      @default(120) @map("max_booking_duration_minutes")
   requireDescription        Boolean  @default(false) @map("require_description")
+  timezone                  String?  @default("UTC") @map("timezone")
 
   @@map("system_settings")
 }

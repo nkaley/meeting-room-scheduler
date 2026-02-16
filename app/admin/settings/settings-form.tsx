@@ -22,9 +22,26 @@ import type { ScheduleSettings } from "@/lib/settings";
 const STEP_OPTIONS = [15, 30, 60] as const;
 const DAY_KEYS = ["daySun", "dayMon", "dayTue", "dayWed", "dayThu", "dayFri", "daySat"] as const;
 
+const TIMEZONE_OPTIONS = [
+  "UTC",
+  "Europe/Moscow",
+  "Europe/Samara",
+  "Europe/Volgograd",
+  "Europe/Kyiv",
+  "Europe/Minsk",
+  "Europe/London",
+  "Europe/Berlin",
+  "Europe/Paris",
+  "America/New_York",
+  "Asia/Almaty",
+  "Asia/Tbilisi",
+  "Asia/Yerevan",
+] as const;
+
 const schema = z.object({
   workStartHour: z.coerce.number().min(0).max(23),
   workEndHour: z.coerce.number().min(0).max(23),
+  timezone: z.string().min(1),
   bookingStepMinutes: z.enum(["15", "30", "60"]),
   workDays: z.array(z.number().min(0).max(6)),
   maxBookingDistanceDays: z.coerce.number().min(1).max(365),
@@ -41,9 +58,11 @@ function settingsToForm(s: ScheduleSettings): FormValues {
   const step = STEP_OPTIONS.includes(s.bookingStepMinutes as 15 | 30 | 60)
     ? s.bookingStepMinutes
     : 30;
+  const tz = s.timezone?.trim() || "UTC";
   return {
     workStartHour: s.workStartHour,
     workEndHour: s.workEndHour,
+    timezone: tz,
     bookingStepMinutes: String(step) as "15" | "30" | "60",
     workDays: [...s.workDays],
     maxBookingDistanceDays: s.maxBookingDistanceDays,
@@ -56,6 +75,7 @@ function formToSettings(v: FormValues): ScheduleSettings {
   return {
     workStartHour: v.workStartHour,
     workEndHour: v.workEndHour,
+    timezone: v.timezone || "UTC",
     bookingStepMinutes: Number(v.bookingStepMinutes),
     workDays: v.workDays,
     maxBookingDistanceDays: v.maxBookingDistanceDays,
@@ -136,6 +156,33 @@ export function SettingsForm({ initialSettings }: { initialSettings: ScheduleSet
             </p>
           )}
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="timezone">{t("timezone")}</Label>
+        <Select
+          value={form.watch("timezone") || "UTC"}
+          onValueChange={(v) => form.setValue("timezone", v)}
+        >
+          <SelectTrigger id="timezone">
+            <SelectValue placeholder={t("timezone")} />
+          </SelectTrigger>
+          <SelectContent>
+            {(() => {
+              const current = form.watch("timezone") || "UTC";
+              const inList = TIMEZONE_OPTIONS.includes(current as (typeof TIMEZONE_OPTIONS)[number]);
+              const options = inList ? TIMEZONE_OPTIONS : [current, ...TIMEZONE_OPTIONS];
+              return options.map((tz) => (
+                <SelectItem key={tz} value={tz}>
+                  {tz}
+                </SelectItem>
+              ));
+            })()}
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-muted-foreground">
+          Working hours (e.g. 9–18) are interpreted in this timezone.
+        </p>
       </div>
 
       <div className="space-y-2">

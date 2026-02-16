@@ -5,8 +5,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getOrCreateSettings } from "@/lib/settings";
-import { intervalsOverlap, slotEnd } from "@/lib/booking-utils";
-import { addDays, startOfDay, setHours, setMinutes } from "date-fns";
+import { intervalsOverlap, slotEnd, getLocalPartsInTimezone } from "@/lib/booking-utils";
+import { addDays, startOfDay } from "date-fns";
 
 export async function createBooking(formData: FormData) {
   const session = await getServerSession(authOptions);
@@ -48,14 +48,20 @@ export async function createBooking(formData: FormData) {
     return { error: "Booking is only available for the next 14 days" };
   }
 
-  const dayStart = setMinutes(setHours(startOfDay(startTime), settings.workStartHour), 0);
-  const dayEnd = setMinutes(setHours(startOfDay(startTime), settings.workEndHour), 0);
-  if (startTime < dayStart || endTime > dayEnd) {
+  const tz = settings.timezone?.trim() || "UTC";
+  const startLocal = getLocalPartsInTimezone(startTime, tz);
+  const endLocal = getLocalPartsInTimezone(endTime, tz);
+  const startInRange =
+    startLocal.hour > settings.workStartHour ||
+    (startLocal.hour === settings.workStartHour && startLocal.minute >= 0);
+  const endInRange =
+    endLocal.hour < settings.workEndHour ||
+    (endLocal.hour === settings.workEndHour && endLocal.minute === 0);
+  if (!startInRange || !endInRange) {
     return { error: "Time must be within working hours" };
   }
 
-  const day = startTime.getDay();
-  if (!settings.workDays.includes(day)) {
+  if (!settings.workDays.includes(startLocal.dayOfWeek)) {
     return { error: "Weekends are not available for booking" };
   }
 

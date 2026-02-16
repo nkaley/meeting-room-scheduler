@@ -12,6 +12,19 @@ import type { ScheduleSettings } from "@/lib/settings";
 
 export type SlotStart = Date;
 
+export function getLocalPartsInTimezone(utcDate: Date, timezone: string): { hour: number; minute: number; dayOfWeek: number } {
+  const tz = timezone?.trim() || "UTC";
+  const hourF = new Intl.DateTimeFormat("en-CA", { timeZone: tz, hour: "numeric", minute: "numeric", hour12: false });
+  const weekdayF = new Intl.DateTimeFormat("en-CA", { timeZone: tz, weekday: "short" });
+  const hourParts = hourF.formatToParts(utcDate);
+  const hour = parseInt(hourParts.find((p) => p.type === "hour")?.value ?? "0", 10);
+  const minute = parseInt(hourParts.find((p) => p.type === "minute")?.value ?? "0", 10);
+  const short = weekdayF.format(utcDate);
+  const dayMap: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+  const dayOfWeek = dayMap[short] ?? 0;
+  return { hour, minute, dayOfWeek };
+}
+
 export function getSlotsForDay(day: Date, settings: ScheduleSettings): SlotStart[] {
   const slots: SlotStart[] = [];
   const { workStartHour, workEndHour, bookingStepMinutes } = settings;

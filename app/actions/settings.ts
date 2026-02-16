@@ -8,6 +8,7 @@ import { updateSettings as updateSettingsDb } from "@/lib/settings";
 export type SettingsFormData = {
   workStartHour: number;
   workEndHour: number;
+  timezone: string;
   bookingStepMinutes: number;
   workDays: number[];
   maxBookingDistanceDays: number;
