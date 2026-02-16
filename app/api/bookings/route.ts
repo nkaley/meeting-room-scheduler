@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getOrCreateSettings } from "@/lib/settings";
-import { startOfDay, setHours, setMinutes } from "date-fns";
+import { getDayBoundsInTimezone } from "@/lib/booking-utils";
 
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
@@ -20,9 +20,13 @@ export async function GET(request: Request) {
   }
 
   const settings = await getOrCreateSettings();
-  const date = startOfDay(new Date(dateStr));
-  const dayStart = setMinutes(setHours(date, settings.workStartHour), 0);
-  const dayEnd = setMinutes(setHours(date, settings.workEndHour), 0);
+  const tz = settings.timezone?.trim() || "UTC";
+  const { dayStart, dayEnd } = getDayBoundsInTimezone(
+    dateStr,
+    tz,
+    settings.workStartHour,
+    settings.workEndHour
+  );
 
   const bookings = await prisma.booking.findMany({
     where: {

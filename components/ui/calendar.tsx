@@ -26,9 +26,9 @@ function Calendar({ className, classNames, locale = enUS, ...props }: CalendarPr
         week: "flex w-full mt-1",
         day: "size-9 p-0 text-center text-sm",
         day_button:
-          "size-9 rounded-md hover:bg-accent aria-selected:bg-primary aria-selected:text-primary-foreground",
+          "size-9 rounded-md hover:bg-accent aria-selected:bg-primary aria-selected:text-primary-foreground hover:aria-selected:bg-primary hover:aria-selected:text-primary-foreground",
         selected: "bg-primary text-primary-foreground",
-        today: "bg-accent",
+        today: "bg-accent text-foreground",
         outside: "text-muted-foreground opacity-50",
         disabled: "opacity-50",
         hidden: "invisible",

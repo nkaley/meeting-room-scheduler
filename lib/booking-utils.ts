@@ -25,6 +25,31 @@ export function getLocalPartsInTimezone(utcDate: Date, timezone: string): { hour
   return { hour, minute, dayOfWeek };
 }
 
+export function getDayBoundsInTimezone(
+  dateStr: string,
+  timezone: string,
+  workStartHour: number,
+  workEndHour: number
+): { dayStart: Date; dayEnd: Date } {
+  const tz = timezone?.trim() || "UTC";
+  const [y, m, d] = dateStr.split("-").map(Number);
+  if (!y || !m || !d) {
+    const fallback = new Date(dateStr);
+    const dayStart = new Date(fallback);
+    dayStart.setUTCHours(workStartHour, 0, 0, 0);
+    const dayEnd = new Date(fallback);
+    dayEnd.setUTCHours(workEndHour, 0, 0, 0);
+    return { dayStart, dayEnd };
+  }
+  const noonUtc = new Date(Date.UTC(y, m - 1, d, 12, 0, 0, 0));
+  const hourF = new Intl.DateTimeFormat("en-CA", { timeZone: tz, hour: "numeric", hour12: false });
+  const localHourAtNoon = parseInt(hourF.formatToParts(noonUtc).find((p) => p.type === "hour")?.value ?? "12", 10);
+  const offsetHours = localHourAtNoon - 12;
+  const dayStart = new Date(Date.UTC(y, m - 1, d, workStartHour - offsetHours, 0, 0, 0));
+  const dayEnd = new Date(Date.UTC(y, m - 1, d, workEndHour - offsetHours, 0, 0, 0));
+  return { dayStart, dayEnd };
+}
+
 export function getSlotsForDay(day: Date, settings: ScheduleSettings): SlotStart[] {
   const slots: SlotStart[] = [];
   const { workStartHour, workEndHour, bookingStepMinutes } = settings;
