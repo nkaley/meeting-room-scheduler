@@ -6,7 +6,7 @@ services:
   app:
     image: nkaley/meeting-scheduler:latest
     container_name: meeting-room-scheduler-app
-    restart: alwaysß
+    restart: always
     ports:
       - "3000:3000"
     environment:

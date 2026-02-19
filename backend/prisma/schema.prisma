@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  name         String   @map("name")
+  surname      String   @map("surname")
+  role         Role     @default(USER)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  bookings Booking[]
+
+  @@map("users")
+}
+
+model VerificationCode {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  code      String
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("verification_codes")
+}
+
+model Room {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  isActive    Boolean   @default(true) @map("is_active")
+
+  bookings Booking[]
+
+  @@map("rooms")
+}
+
+model Booking {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  roomId      String   @map("room_id")
+  startTime   DateTime @map("start_time")
+  endTime     DateTime @map("end_time")
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@index([roomId, startTime, endTime])
+  @@map("bookings")
+}
+
+model SystemSettings {
+  id                        String   @id @default(uuid())
+  workStartHour             Int      @default(9) @map("work_start_hour")
+  workEndHour               Int      @default(18) @map("work_end_hour")
+  bookingStepMinutes        Int      @default(30) @map("booking_step_minutes")
+  workDays                  Int[]    @default([1, 2, 3, 4, 5]) @map("work_days")
+  maxBookingDistanceDays    Int      @default(14) @map("max_booking_distance_days")
+  maxBookingDurationMinutes Int      @default(120) @map("max_booking_duration_minutes")
+  requireDescription        Boolean  @default(false) @map("require_description")
+  timezone                  String?  @default("UTC") @map("timezone")
+
+  @@map("system_settings")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
